@@ -4,11 +4,10 @@ mod schema;
 #[path = "../connection.rs"]
 mod connection;
 
-use actix_web::*;
 use bcrypt::{ DEFAULT_COST, hash };
 use super::user_models::{NewUser, User};
 use crate::schema::users::dsl::*;
-use crate::connection::*;
+use crate::connection::Pool;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 use actix_web::{web, Error, HttpResponse};

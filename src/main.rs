@@ -10,7 +10,7 @@ extern crate diesel;
 extern crate chrono;
 extern crate serde;
 
-use connection::init_pool;
+use connection::{ Pool, init_pool };
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

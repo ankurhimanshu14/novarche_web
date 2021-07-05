@@ -16,6 +16,6 @@ CREATE TABLE IF NOT EXISTS grades(
     grade_name VARCHAR NOT NULL,
     size INT NOT NULL,
     section VARCHAR NOT NULL,
-    created_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     modified_at TIMESTAMP
 );

@@ -1,17 +1,99 @@
-use actix_web::{ Responder, HttpResponse };
+#[path = "../schema.rs"]
+mod schema;
 
-pub async fn get_grades() -> impl Responder {
-    HttpResponse::Ok().body("Hello from get grades")
+#[path = "../connection.rs"]
+mod connection;
+
+use super::grade_models::{NewGrade, Grade};
+use crate::schema::grades::dsl::*;
+use crate::connection::Pool;
+use diesel::QueryDsl;
+use diesel::RunQueryDsl;
+use actix_web::{web, Error, HttpResponse};
+use diesel::dsl::{delete, insert_into};
+use serde::{Deserialize, Serialize};
+use std::vec::Vec;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct InputGrade {
+    pub grade_name: String,
+    pub size: i32,
+    pub section: String
 }
 
-pub async fn get_grade_by_id() -> impl Responder {
-    HttpResponse::Ok().body("Hello from get grade by id")
+// Handler for GET /grades
+pub async fn get_grades(db: web::Data<Pool>) -> Result<HttpResponse, Error> {
+    Ok(web::block(move || get_all_grades(db))
+        .await
+        .map(|grade| HttpResponse::Ok().json(grade))
+        .map_err(|_| HttpResponse::InternalServerError())?)
 }
 
-pub async fn add_grade() -> impl Responder {
-    HttpResponse::Ok().body("Hello from add grade")
+// Handler for GET /grades/{id}
+pub async fn get_grade_by_id(
+    db: web::Data<Pool>,
+    grade_id: web::Path<i32>,
+) -> Result<HttpResponse, Error> {
+    Ok(
+        web::block(move || db_get_grade_by_id(db, grade_id.into_inner()))
+            .await
+            .map(|grade| HttpResponse::Ok().json(grade))
+            .map_err(|_| HttpResponse::InternalServerError())?,
+    )
 }
 
-pub async fn delete_grade() -> impl Responder {
-    HttpResponse::Ok().body("Hello from delete grade")
+// Handler for POST /grades
+pub async fn add_grade(
+    db: web::Data<Pool>,
+    item: web::Json<InputGrade>,
+) -> Result<HttpResponse, Error> {
+    Ok(web::block(move || add_single_grade(db, item))
+        .await
+        .map(|grade| HttpResponse::Created().json(grade))
+        .map_err(|_| HttpResponse::InternalServerError())?)
+}
+
+// Handler for DELETE /grades/{id}
+pub async fn delete_grade(
+    db: web::Data<Pool>,
+    grade_id: web::Path<i32>,
+) -> Result<HttpResponse, Error> {
+    Ok(
+        web::block(move || delete_single_grade(db, grade_id.into_inner()))
+            .await
+            .map(|grade| HttpResponse::Ok().json(grade))
+            .map_err(|_| HttpResponse::InternalServerError())?,
+    )
+}
+
+
+fn get_all_grades(pool: web::Data<Pool>) -> Result<Vec<Grade>, diesel::result::Error> {
+    let conn = pool.get().unwrap();
+    let items = grades.load::<Grade>(&conn)?;
+    Ok(items)
+}
+
+fn db_get_grade_by_id(pool: web::Data<Pool>, grade_id: i32) -> Result<Grade, diesel::result::Error> {
+    let conn = pool.get().unwrap();
+    grades.find(grade_id).get_result::<Grade>(&conn)
+}
+
+fn add_single_grade(
+    db: web::Data<Pool>,
+    item: web::Json<InputGrade>,
+) -> Result<Grade, diesel::result::Error> {
+    let conn = db.get().unwrap();
+    let new_grade = NewGrade {
+        grade_name: &item.grade_name,
+        size: &item.size,
+        section: &item.section
+    };
+    let res = insert_into(grades).values(&new_grade).get_result(&conn)?;
+    Ok(res)
+}
+
+fn delete_single_grade(db: web::Data<Pool>, grade_id: i32) -> Result<usize, diesel::result::Error> {
+    let conn = db.get().unwrap();
+    let count = delete(grades.find(grade_id)).execute(&conn)?;
+    Ok(count)
 }

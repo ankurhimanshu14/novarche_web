@@ -3,7 +3,6 @@ use diesel::r2d2::{self, ConnectionManager};
 
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
-#[warn(dead_code)]
 pub fn init_pool() -> Pool {
     dotenv::dotenv().ok();
     std::env::set_var("RUST_LOG", "actix_web=debug");
