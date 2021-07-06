@@ -29,10 +29,3 @@ pub struct NewUser<'a> {
     pub username: &'a str,
     pub hash: &'a str,
 }
-
-#[derive(Debug, Deserialize)]
-pub struct LoginUser {
-    pub username: String,
-    #[serde(skip_serializing)]
-    pub password: String
-}

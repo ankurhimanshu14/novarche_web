@@ -2,6 +2,7 @@ use actix_web::{ web, App, HttpServer };
 use actix_identity::{ IdentityService, CookieIdentityPolicy };
 
 mod users;
+mod auth;
 mod grades;
 mod connection;
 mod schema;
@@ -28,6 +29,10 @@ async fn main() -> std::io::Result<()> {
         .data(pool.clone())
         .service(
             web::scope("/api/v1/routes")
+            .configure(auth::auth_config::auth_config)
+        )
+        .service(
+            web::scope("/api/v1/routes/{auth-token}")
             .configure(users::user_config::user_config)
             .configure(grades::grade_config::grade_config)
         )
