@@ -1,4 +1,5 @@
 use actix_web::{ web, App, HttpServer };
+use actix_identity::{ IdentityService, CookieIdentityPolicy };
 
 mod users;
 mod grades;
@@ -19,6 +20,11 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+        .wrap(IdentityService::new(
+            CookieIdentityPolicy::new(&[0; 32])
+            .name("auth-cookie")
+            .secure(false)
+        ))
         .data(pool.clone())
         .service(
             web::scope("/api/v1/routes")

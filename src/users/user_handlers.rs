@@ -5,16 +5,18 @@ mod schema;
 mod connection;
 
 use bcrypt::{ DEFAULT_COST, hash, verify };
-use super::user_models::{NewUser, User, LoginUser};
 use crate::schema::users::dsl::*;
 use crate::connection::Pool;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 use diesel::ExpressionMethods;
-use actix_web::{web, Error, HttpResponse};
 use diesel::dsl::{delete, insert_into};
+use actix_web::{web, Error, HttpResponse, Responder};
+use actix_identity::Identity;
 use serde::{Deserialize, Serialize};
 use std::vec::Vec;
+
+use super::user_models::{NewUser, User, LoginUser};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputUser {
@@ -34,30 +36,32 @@ pub async fn get_users(db: web::Data<Pool>) -> Result<HttpResponse, Error> {
         .map_err(|_| HttpResponse::InternalServerError())?)
 }
 
-// Handler for GET /users/{id}
-pub async fn get_user_by_id(
-    db: web::Data<Pool>,
-    user_id: web::Path<i32>,
-) -> Result<HttpResponse, Error> {
-    Ok(
-        web::block(move || db_get_user_by_id(db, user_id.into_inner()))
-            .await
-            .map(|user| HttpResponse::Ok().json(user))
-            .map_err(|_| HttpResponse::InternalServerError())?
-    )
-}
-
 //Handler for POST /users/login
 pub async fn process_login(
     db: web::Data<Pool>,
-    login: web::Json<LoginUser>
+    login: web::Json<LoginUser>,
+    session_id: Identity
 ) -> Result<HttpResponse, Error> {
-    Ok(
-        web::block(move || login_user(db, login.into_inner()))
-            .await
-            .map(|user| HttpResponse::Ok().json(user))
-            .map_err(|_| HttpResponse::InternalServerError())?
-    )
+
+    let session_token = String::from(login.username.clone());
+                
+    session_id.remember(session_token);
+
+    if let Some(_) = session_id.identity() {
+        Ok(
+            web::block(move || login_user(db, login.into_inner()))
+                .await
+                .map(|user| {
+                    match user {
+                        true => HttpResponse::Ok().body(format!("Logged In")),
+                        false => HttpResponse::Ok().body(format!("Wrong Credentials")),
+                    }
+                })
+                .map_err(|_| HttpResponse::InternalServerError())?
+        )
+    } else {
+        Ok(HttpResponse::Ok().body("Login to proceed"))
+    }
 }
 
 // Handler for POST /users
@@ -84,15 +88,16 @@ pub async fn delete_user(
     )
 }
 
+// Handler for GET /users/logout
+pub async fn logout(session_id: Identity) -> impl Responder {
+    session_id.forget();
+    HttpResponse::Ok().body("Logged out.")
+}
+
 fn get_all_users(pool: web::Data<Pool>) -> Result<Vec<User>, diesel::result::Error> {
     let conn = pool.get().unwrap();
     let items = users.load::<User>(&conn)?;
     Ok(items)
-}
-
-fn db_get_user_by_id(pool: web::Data<Pool>, user_id: i32) -> Result<User, diesel::result::Error> {
-    let conn = pool.get().unwrap();
-    users.find(user_id).get_result::<User>(&conn)
 }
 
 fn add_single_user(
@@ -127,8 +132,9 @@ fn login_user(pool: web::Data<Pool>, login_user: LoginUser) -> Result<bool, dies
 
     match user {
         Ok(u) => {
-            if verify(&login_user.password, &u.hash).unwrap() && &u.status == "ACTIVE" {
+            if verify(&login_user.password, &u.hash).unwrap() && &u.status == "ACTIVE" {                
                 Ok(true)
+            
             } else {
                 Ok(false)
             }
