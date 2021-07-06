@@ -18,9 +18,7 @@ use super::user_models::{NewUser, User};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputUser {
-    pub first_name: String,
-    pub middle_name: Option<String>,
-    pub last_name: String,
+    pub employee_id: String,
     pub email: String,
     pub username: String,
     pub hash: String
@@ -70,12 +68,7 @@ fn add_single_user(
 ) -> Result<User, diesel::result::Error> {
     let conn = pool.get().unwrap();
     let new_user = NewUser {
-        first_name: &item.first_name,
-        middle_name: match &item.middle_name.as_ref().unwrap().len() {
-            0 => None,
-            _ => Some(&item.middle_name.as_ref().unwrap())
-        },
-        last_name: &item.last_name,
+        employee_id: &item.employee_id,
         email: &item.email,
         username: &item.username,
         hash: &hash(&item.hash, DEFAULT_COST).unwrap()

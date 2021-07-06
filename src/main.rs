@@ -6,6 +6,7 @@ mod auth;
 mod grades;
 mod connection;
 mod schema;
+mod employees;
 
 #[macro_use]
 extern crate diesel;
@@ -33,6 +34,7 @@ async fn main() -> std::io::Result<()> {
         )
         .service(
             web::scope("/api/v1/routes/{auth-token}")
+            .configure(employees::employee_config::employee_config)
             .configure(users::user_config::user_config)
             .configure(grades::grade_config::grade_config)
         )
