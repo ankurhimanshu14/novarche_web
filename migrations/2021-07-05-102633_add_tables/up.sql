@@ -1,4 +1,5 @@
 -- Your SQL goes here
+
 CREATE TABLE IF NOT EXISTS users(
     id SERIAL PRIMARY KEY,
     first_name VARCHAR NOT NULL,
@@ -7,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users(
     email VARCHAR NOT NULL UNIQUE,
     username VARCHAR NOT NULL UNIQUE,
     hash VARCHAR NOT NULL,
+    status VARCHAR NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     modified_at TIMESTAMP
 );

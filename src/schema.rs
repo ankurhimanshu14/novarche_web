@@ -18,6 +18,7 @@ table! {
         email -> Varchar,
         username -> Varchar,
         hash -> Varchar,
+        status -> Varchar,
         created_at -> Timestamp,
         modified_at -> Nullable<Timestamp>,
     }

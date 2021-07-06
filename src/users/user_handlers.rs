@@ -4,12 +4,13 @@ mod schema;
 #[path = "../connection.rs"]
 mod connection;
 
-use bcrypt::{ DEFAULT_COST, hash };
-use super::user_models::{NewUser, User};
+use bcrypt::{ DEFAULT_COST, hash, verify };
+use super::user_models::{NewUser, User, LoginUser};
 use crate::schema::users::dsl::*;
 use crate::connection::Pool;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
+use diesel::ExpressionMethods;
 use actix_web::{web, Error, HttpResponse};
 use diesel::dsl::{delete, insert_into};
 use serde::{Deserialize, Serialize};
@@ -42,7 +43,20 @@ pub async fn get_user_by_id(
         web::block(move || db_get_user_by_id(db, user_id.into_inner()))
             .await
             .map(|user| HttpResponse::Ok().json(user))
-            .map_err(|_| HttpResponse::InternalServerError())?,
+            .map_err(|_| HttpResponse::InternalServerError())?
+    )
+}
+
+//Handler for POST /users/login
+pub async fn process_login(
+    db: web::Data<Pool>,
+    login: web::Json<LoginUser>
+) -> Result<HttpResponse, Error> {
+    Ok(
+        web::block(move || login_user(db, login.into_inner()))
+            .await
+            .map(|user| HttpResponse::Ok().json(user))
+            .map_err(|_| HttpResponse::InternalServerError())?
     )
 }
 
@@ -66,10 +80,9 @@ pub async fn delete_user(
         web::block(move || delete_single_user(db, user_id.into_inner()))
             .await
             .map(|user| HttpResponse::Ok().json(user))
-            .map_err(|_| HttpResponse::InternalServerError())?,
+            .map_err(|_| HttpResponse::InternalServerError())?
     )
 }
-
 
 fn get_all_users(pool: web::Data<Pool>) -> Result<Vec<User>, diesel::result::Error> {
     let conn = pool.get().unwrap();
@@ -83,10 +96,10 @@ fn db_get_user_by_id(pool: web::Data<Pool>, user_id: i32) -> Result<User, diesel
 }
 
 fn add_single_user(
-    db: web::Data<Pool>,
+    pool: web::Data<Pool>,
     item: web::Json<InputUser>,
 ) -> Result<User, diesel::result::Error> {
-    let conn = db.get().unwrap();
+    let conn = pool.get().unwrap();
     let new_user = NewUser {
         first_name: &item.first_name,
         middle_name: match &item.middle_name.as_ref().unwrap().len() {
@@ -102,8 +115,27 @@ fn add_single_user(
     Ok(res)
 }
 
-fn delete_single_user(db: web::Data<Pool>, user_id: i32) -> Result<usize, diesel::result::Error> {
-    let conn = db.get().unwrap();
+fn delete_single_user(pool: web::Data<Pool>, user_id: i32) -> Result<usize, diesel::result::Error> {
+    let conn = pool.get().unwrap();
     let count = delete(users.find(user_id)).execute(&conn)?;
     Ok(count)
+}
+
+fn login_user(pool: web::Data<Pool>, login_user: LoginUser) -> Result<bool, diesel::result::Error> {
+    let conn = pool.get().unwrap();
+    let user = users.filter(username.eq(&login_user.username)).first::<User>(&conn);
+
+    match user {
+        Ok(u) => {
+            if verify(&login_user.password, &u.hash).unwrap() && &u.status == "ACTIVE" {
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        },
+        Err(e) => {
+            println!("{}: {:?}", &login_user.username, e);
+            Ok(false)
+        }
+    }
 }

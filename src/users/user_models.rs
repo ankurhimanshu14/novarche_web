@@ -4,7 +4,7 @@ mod schema;
 use crate::schema::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug,Serialize, Deserialize, Queryable)]
+#[derive(Debug,Serialize, Deserialize, Queryable, Eq, PartialEq)]
 pub struct User {
     pub user_id: i32,
     pub first_name: String,
@@ -12,7 +12,9 @@ pub struct User {
     pub last_name: String,
     pub email: String,
     pub username: String,
+    #[serde(skip_serializing)]
     pub hash: String,
+    pub status: String,
     pub created_at: chrono::NaiveDateTime,
     pub modified_at: Option<chrono::NaiveDateTime>,
 }
@@ -26,4 +28,11 @@ pub struct NewUser<'a> {
     pub email: &'a str,
     pub username: &'a str,
     pub hash: &'a str,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LoginUser {
+    pub username: String,
+    #[serde(skip_serializing)]
+    pub password: String
 }
