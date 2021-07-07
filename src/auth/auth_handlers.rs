@@ -13,13 +13,13 @@ use crate::connection::Pool;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 use diesel::ExpressionMethods;
-use actix_web::{web, Error, HttpResponse, HttpRequest, Responder};
+use actix_web::{web, Error, HttpResponse, Responder};
 use actix_identity::Identity;
 use serde::{Deserialize, Serialize};
 
 use super::auth_models::LoginUser;
 
-use crate::users::user_models::User;
+use crate::users::user_models::{User, Userstatus};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputUser {
@@ -71,7 +71,7 @@ fn login_user(pool: web::Data<Pool>, login_user: LoginUser) -> Result<bool, dies
 
     match user {
         Ok(u) => {
-            if verify(&login_user.password, &u.hash).unwrap() && &u.status == "ACTIVE" {                
+            if verify(&login_user.password, &u.hash).unwrap() && &u.status == Userstatus::Active {                
                 Ok(true)
             
             } else {

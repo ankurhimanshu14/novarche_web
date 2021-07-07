@@ -4,7 +4,7 @@ mod schema;
 #[path = "../connection.rs"]
 mod connection;
 
-use super::employee_models::{NewEmployee, Employee};
+use super::employee_models::{NewEmployee, Employee, Title};
 use crate::schema::employees::dsl::*;
 use crate::connection::Pool;
 use diesel::QueryDsl;
@@ -17,12 +17,13 @@ use std::vec::Vec;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputEmployee {
     pub employee_id: String,
+    pub title: Title,
     pub first_name: String,
     pub middle_name: Option<String>,
     pub last_name: String,
-    pub uidai: i32,
+    pub uidai: i64,
     pub pan: String,
-    pub uan: i32
+    pub uan: i64
 }
 
 // Handler for GET /employees
@@ -89,6 +90,7 @@ fn add_single_employee(
     let conn = db.get().unwrap();
     let new_employee = NewEmployee {
         employee_id: &item.employee_id,
+        title: &item.title,
         first_name: &item.first_name,
         middle_name: match &item.middle_name.as_ref().unwrap().len() {
             0 => None,

@@ -14,14 +14,15 @@ use actix_web::{web, Error, HttpResponse};
 use serde::{Deserialize, Serialize};
 use std::vec::Vec;
 
-use super::user_models::{NewUser, User};
+use super::user_models::{NewUser, User, Role};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputUser {
     pub employee_id: String,
     pub email: String,
     pub username: String,
-    pub hash: String
+    pub hash: String,
+    pub role: Role
 }
 
 // Handler for GET /users
@@ -71,7 +72,8 @@ fn add_single_user(
         employee_id: &item.employee_id,
         email: &item.email,
         username: &item.username,
-        hash: &hash(&item.hash, DEFAULT_COST).unwrap()
+        hash: &hash(&item.hash, DEFAULT_COST).unwrap(),
+        role: &item.role
     };
     let res = insert_into(users).values(&new_user).get_result(&conn)?;
     Ok(res)
