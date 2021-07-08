@@ -1,17 +1,14 @@
-use actix_web::{ HttpServer, App, web, Responder, HttpResponse };
+use actix_web::{ HttpServer, App, web };
 use dotenv;
 
 #[macro_use]
 extern crate diesel;
 extern crate chrono;
+extern crate num;
 
 mod connection;
 mod schema;
 mod employees;
-
-async fn index() -> impl Responder {
-    HttpResponse::Ok().body("Hello Ankita!")
-}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -24,8 +21,12 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
         .data(pool.clone())
-        .route("/hello", web::get().to(index))
+        .service(
+            web::scope("/api/v1/routes")
+            .configure(employees::employee_config::employee_config)
+        )
     })
+    .workers(10)
     .bind(format!("{}:{}", &host, &port))?
     .run()
     .await
