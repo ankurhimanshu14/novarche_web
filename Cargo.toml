@@ -1,19 +1,18 @@
 [package]
 name = "novarche_web"
 version = "0.1.0"
+authors = ["Ankur Himanshu <ankurhimanshu1408@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 actix-web = "3.3"
-diesel = { version = "1.4.4", default-features = false, features = ["postgres", "r2d2", "chrono", "64-column-tables", "numeric"] }
 dotenv = "0.15"
 serde = "1.0"
-serde_derive = "1.0"
 serde_json = "1.0"
-chrono = { version = "0.4", default-features = false, features = ["serde"] }
-bcrypt = "0.10"
+serde_derive = "1.0"
+diesel = { version = "1.4.7", default-features = false, features = ["postgres", "r2d2", "chrono", "numeric", "64-column-tables"] }
 r2d2 = "0.8"
 futures = "0.3"
-actix-identity = "0.3"
+chrono = { version = "0.4", features = ["serde"] }

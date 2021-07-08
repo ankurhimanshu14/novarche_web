@@ -1,45 +1,32 @@
-use actix_web::{ web, App, HttpServer };
-use actix_identity::{ IdentityService, CookieIdentityPolicy };
-
-mod users;
-mod auth;
-mod grades;
-mod connection;
-mod schema;
-mod employees;
+use actix_web::{ HttpServer, App, web, Responder, HttpResponse };
+use dotenv;
 
 #[macro_use]
 extern crate diesel;
 extern crate chrono;
-extern crate serde;
 
-use connection::{ init_pool };
+mod connection;
+mod schema;
+mod employees;
+
+async fn index() -> impl Responder {
+    HttpResponse::Ok().body("Hello Ankita!")
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 
-    let pool = init_pool();
+    let pool = connection::init_pool();
+    
+    let host = dotenv::var("HOST").unwrap();
+    let port = dotenv::var("PORT").unwrap();
 
     HttpServer::new(move || {
         App::new()
-        .wrap(IdentityService::new(
-            CookieIdentityPolicy::new(&[0; 32])
-            .name("auth-cookie")
-            .secure(false)
-        ))
         .data(pool.clone())
-        .service(
-            web::scope("/api/v1/routes")
-            .configure(auth::auth_config::auth_config)
-        )
-        .service(
-            web::scope("/api/v1/routes/{auth-token}")
-            .configure(employees::employee_config::employee_config)
-            .configure(users::user_config::user_config)
-            .configure(grades::grade_config::grade_config)
-        )
+        .route("/hello", web::get().to(index))
     })
-    .bind("127.0.0.1:8080")?
+    .bind(format!("{}:{}", &host, &port))?
     .run()
     .await
 }

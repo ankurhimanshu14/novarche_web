@@ -10,5 +10,5 @@ pub fn init_pool() -> Pool {
 
     let manager = ConnectionManager::<PgConnection>::new(database_url);
     
-    Pool::new(manager).expect("db pool")
+    Pool::new(manager).expect("Failed to create pool")
 }
