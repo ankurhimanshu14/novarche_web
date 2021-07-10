@@ -16,21 +16,11 @@ use std::vec::Vec;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputEmployee {
+    pub person_id: i32,
     pub employee_id: String,
-    pub title: String,
-    pub first_name: String,
-    pub middle_name: Option<String>,
-    pub last_name: String,
-    pub gender: String,
-    pub dob: String,
-    pub address: Option<String>,
-    pub email: Option<String>,
-    pub dept_id: i32,
+    pub dept_id: String,
     pub salary: i32,
     pub doj: String,
-    pub uidai: i32,
-    pub uan: i32,
-    pub pan: Option<String>,
     pub created_by: String
 }
 
@@ -59,7 +49,7 @@ pub async fn get_employee_by_id(
 pub async fn add_employee(
     db: web::Data<Pool>,
     item: web::Json<InputEmployee>,
-) -> Result<HttpResponse, Error> {
+) -> Result<HttpResponse, Error> {    
     Ok(web::block(move || add_single_employee(db, item))
         .await
         .map(|employee| HttpResponse::Created().json(employee))
@@ -97,33 +87,11 @@ fn add_single_employee(
     let conn = pool.get().unwrap();
 
     let new_employee = NewEmployee {
+        person_id: &item.person_id,
         employee_id: &item.employee_id,
-        title: &item.title,
-        first_name: &item.first_name,
-        middle_name: match &item.middle_name.as_ref().unwrap().is_empty() {
-            true => None,
-            false => Some(&item.middle_name.as_ref().unwrap())
-        },
-        last_name: &item.last_name,
-        gender: &item.gender,
-        dob: chrono::NaiveDateTime::parse_from_str(&item.dob, "%d-%m-%Y").unwrap(),
-        address: match &item.address.as_ref().unwrap().is_empty() {
-            true => None,
-            false => Some(&item.address.as_ref().unwrap())
-        },
-        email: match &item.email.as_ref().unwrap().is_empty() {
-            true => None,
-            false => Some(&item.email.as_ref().unwrap())
-        },
         dept_id: &item.dept_id,
         salary: &item.salary,
-        doj: chrono::NaiveDateTime::parse_from_str(&item.doj, "%d-%m-%Y").unwrap(),
-        uidai: &item.uidai,
-        uan: &item.uan,
-        pan: match &item.pan.as_ref().unwrap().is_empty() {
-            true => None,
-            false => Some(&item.pan.as_ref().unwrap())
-        },
+        doj: chrono::NaiveDate::parse_from_str(&item.doj, "%d-%m-%Y").unwrap(),
         created_by: &item.created_by
     };
 

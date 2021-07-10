@@ -5,14 +5,11 @@ use serde::{ Deserialize, Serialize };
 use crate::schema::*;
 
 #[derive(Debug, Queryable, Serialize, Deserialize, Eq, PartialEq, PartialOrd)]
-pub struct Employee {
+pub struct User {
     pub id: i32,
-    pub person_id: i32,
     pub employee_id: String,
-    pub dept_id: String,
-    pub salary: i32,
-    pub doj: chrono::NaiveDate,
-    pub dol: Option<chrono::NaiveDate>,
+    pub username: String,
+    password: String,
     pub created_on: chrono::NaiveDateTime,
     pub created_by: String,
     pub modified_on: Option<chrono::NaiveDateTime>,
@@ -21,13 +18,11 @@ pub struct Employee {
 }
 
 #[derive(Debug, Insertable, Identifiable)]
-#[table_name = "employees"]
-#[primary_key(employee_id)]
-pub struct NewEmployee<'a> {
-    pub person_id: &'a i32,
+#[table_name = "users"]
+#[primary_key(username)]
+pub struct NewUser<'a> {
     pub employee_id: &'a str,
-    pub dept_id: &'a str,
-    pub salary: &'a i32,
-    pub doj: chrono::NaiveDate,
+    pub username: &'a str,
+    pub password: &'a str,
     pub created_by: &'a str
 }

@@ -1,26 +1,61 @@
 -- Your SQL goes here
 
-CREATE TABLE IF NOT EXISTS employees(
-    id SERIAL,
-    employee_id TEXT NOT NULL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS persons(
+    id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
     first_name TEXT NOT NULL,
     middle_name TEXT,
     last_name TEXT NOT NULL,
     gender TEXT NOT NULL,
-    dob TIMESTAMP NOT NULL,
+    dob DATE NOT NULL,
     address TEXT,
     email TEXT,
-    dept_id SERIAL NOT NULL,
-    salary SERIAL NOT NULL,
-    doj TIMESTAMP NOT NULL,
-    dol TIMESTAMP,
-    uidai SERIAL NOT NULL,
-    uan SERIAL NOT NULL,
+    uidai BIGSERIAL NOT NULL,
+    uan BIGSERIAL NOT NULL,
     pan TEXT,
     created_on TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by TEXT NOT NULL,
     modified_on TIMESTAMP,
+    modified_by TEXT
+);
+
+CREATE TABLE IF NOT EXISTS employees(
+    id SERIAL,
+    person_id SERIAL,
+    employee_id TEXT NOT NULL UNIQUE PRIMARY KEY,
+    dept_id TEXT NOT NULL,
+    salary SERIAL NOT NULL,
+    doj DATE NOT NULL,
+    dol DATE,
+    created_on TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by TEXT NOT NULL,
+    modified_on TIMESTAMP,
     modified_by TEXT,
-    is_active BOOLEAN NOT NULL DEFAULT true
+    is_active BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT fk_person
+        FOREIGN KEY (person_id)
+            REFERENCES persons(id)
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS users(
+    id SERIAL,
+    employee_id TEXT NOT NULL UNIQUE,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    created_on TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by TEXT NOT NULL,
+    modified_on TIMESTAMP,
+    modified_by TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+
+    PRIMARY KEY(username),
+
+    CONSTRAINT fk_user
+        FOREIGN KEY (employee_id)
+            REFERENCES employees(employee_id)
+            ON UPDATE CASCADE
+            ON DELETE CASCADE
 );
