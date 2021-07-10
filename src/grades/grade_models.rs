@@ -5,25 +5,23 @@ use serde::{ Deserialize, Serialize };
 use crate::schema::*;
 
 #[derive(Debug, Queryable, Serialize, Deserialize, Eq, PartialEq, PartialOrd)]
-pub struct User {
+pub struct Grade {
     pub id: i32,
-    pub employee_id: String,
-    pub username: String,
-    #[serde(skip_serializing)]
-    pub password: String,
+    pub grade_name: String,
+    pub size: i32,
+    pub section: String,
     pub created_on: chrono::NaiveDateTime,
     pub created_by: String,
     pub modified_on: Option<chrono::NaiveDateTime>,
-    pub modified_by: Option<String>,
-    pub is_active: bool
+    pub modified_by: Option<String>
 }
 
 #[derive(Debug, Insertable, Identifiable)]
-#[table_name = "users"]
-#[primary_key(username)]
-pub struct NewUser<'a> {
-    pub employee_id: &'a str,
-    pub username: &'a str,
-    pub password: &'a str,
+#[table_name = "grades"]
+#[primary_key(grade_name)]
+pub struct NewGrade<'a> {
+    pub grade_name: &'a str,
+    pub size: &'a i32,
+    pub section: &'a str,
     pub created_by: &'a str
 }

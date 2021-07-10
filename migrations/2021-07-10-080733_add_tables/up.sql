@@ -1,5 +1,3 @@
--- Your SQL goes here
-
 CREATE TABLE IF NOT EXISTS persons(
     id SERIAL PRIMARY KEY,
     title TEXT NOT NULL,
@@ -58,4 +56,17 @@ CREATE TABLE IF NOT EXISTS users(
             REFERENCES employees(employee_id)
             ON UPDATE CASCADE
             ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS grades(
+    id SERIAL,
+    grade_name TEXT NOT NULL UNIQUE,
+    size SERIAL NOT NULL,
+    section TEXT NOT NULL,
+    created_on TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by TEXT NOT NULL,
+    modified_on TIMESTAMP,
+    modified_by TEXT,
+
+    PRIMARY KEY(grade_name)
 );

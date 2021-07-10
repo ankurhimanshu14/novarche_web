@@ -1,6 +1,4 @@
 table! {
-    use diesel::sql_types::*;
-
     employees (employee_id) {
         id -> Int4,
         person_id -> Int4,
@@ -18,8 +16,19 @@ table! {
 }
 
 table! {
-    use diesel::sql_types::*;
+    grades (grade_name) {
+        id -> Int4,
+        grade_name -> Text,
+        size -> Int4,
+        section -> Text,
+        created_on -> Timestamp,
+        created_by -> Text,
+        modified_on -> Nullable<Timestamp>,
+        modified_by -> Nullable<Text>,
+    }
+}
 
+table! {
     persons (id) {
         id -> Int4,
         title -> Text,
@@ -41,8 +50,6 @@ table! {
 }
 
 table! {
-    use diesel::sql_types::*;
-
     users (username) {
         id -> Int4,
         employee_id -> Text,
@@ -61,6 +68,7 @@ joinable!(users -> employees (employee_id));
 
 allow_tables_to_appear_in_same_query!(
     employees,
+    grades,
     persons,
     users,
 );
