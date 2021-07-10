@@ -1,13 +1,12 @@
 #[path = "../schema.rs"]
 mod schema;
 
-#[path = "../connection.rs"]
-mod connection;
+#[path = "../utils.rs"]
+mod utils;
 
-use bcrypt::{ DEFAULT_COST, hash };
 use super::grade_models::{NewGrade, Grade};
 use crate::schema::grades::dsl::*;
-use crate::connection::Pool;
+use crate::utils::Pool;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 use actix_web::{web, Error, HttpResponse};
@@ -17,6 +16,7 @@ use std::vec::Vec;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct InputGrade {
+    pub steel_code: String,
     pub grade_name: String,
     pub size: i32,
     pub section: String,
@@ -86,6 +86,7 @@ fn add_single_grade(
     let conn = pool.get().unwrap();
 
     let new_grade = NewGrade {
+        steel_code: &item.steel_code,
         grade_name: &item.grade_name,
         size: &item.size,
         section: &item.section,

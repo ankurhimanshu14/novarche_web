@@ -1,12 +1,12 @@
 #[path = "../schema.rs"]
 mod schema;
 
-#[path = "../connection.rs"]
-mod connection;
+#[path = "../utils.rs"]
+mod utils;
 
 use super::person_models::{NewPerson, Person};
 use crate::schema::persons::dsl::*;
-use crate::connection::Pool;
+use crate::utils::Pool;
 use diesel::QueryDsl;
 use diesel::RunQueryDsl;
 use actix_web::{web, Error, HttpResponse};
