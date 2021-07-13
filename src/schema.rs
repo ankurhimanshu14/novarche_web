@@ -63,6 +63,22 @@ table! {
 }
 
 table! {
+    parts (part_no) {
+        id -> Int4,
+        part_code -> Text,
+        part_no -> Int4,
+        part_name -> Text,
+        material -> Text,
+        forging_wt -> Float4,
+        cut_wt -> Float4,
+        created_on -> Timestamp,
+        created_by -> Text,
+        modified_on -> Nullable<Timestamp>,
+        modified_by -> Nullable<Text>,
+    }
+}
+
+table! {
     persons (id) {
         id -> Int4,
         title -> Text,
@@ -107,6 +123,7 @@ allow_tables_to_appear_in_same_query!(
     employees,
     grades,
     grns,
+    parts,
     persons,
     users,
 );

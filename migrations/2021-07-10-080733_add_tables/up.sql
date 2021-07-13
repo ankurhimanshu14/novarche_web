@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS persons(
     dob DATE NOT NULL,
     address TEXT,
     email TEXT,
-    uidai BIGSERIAL NOT NULL,
-    uan BIGSERIAL NOT NULL,
-    pan TEXT,
+    uidai BIGSERIAL NOT NULL UNIQUE,
+    uan BIGSERIAL NOT NULL UNIQUE,
+    pan TEXT UNIQUE,
     created_on TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by TEXT NOT NULL,
     modified_on TIMESTAMP,
@@ -121,23 +121,23 @@ CREATE TABLE IF NOT EXISTS approvals(
             ON DELETE CASCADE
 );
 
-CREATE FUNCTION insert_approvals() RETURNS TRIGGER AS
-    $BODY$
-    BEGIN
-        INSERT INTO approvals (rm_id, heat_no, part_no, avail_qty)
-        SELECT
-        g.grn,
-        NEW.heat_no,
-        NEW.part_no,
-        g.received_qty
-        FROM grns g
-        WHERE g.heat_no = NEW.heat_no;
-    END
-    $BODY$
-LANGUAGE 'plpgsql';
+-- CREATE FUNCTION insert_approvals() RETURNS TRIGGER AS
+--     $BODY$
+--     BEGIN
+--         INSERT INTO approvals (rm_id, heat_no, part_no, avail_qty)
+--         SELECT
+--         g.grn,
+--         NEW.heat_no,
+--         NEW.part_no,
+--         g.received_qty
+--         FROM grns g
+--         WHERE g.heat_no = NEW.heat_no;
+--     END
+--     $BODY$
+-- LANGUAGE 'plpgsql';
 
-CREATE TRIGGER after_approved_components_insert
-    AFTER INSERT
-    ON temp_approvals
-    FOR EACH ROW
-EXECUTE PROCEDURE insert_approvals();
+-- CREATE TRIGGER after_approved_components_insert
+--     AFTER INSERT
+--     ON temp_approvals
+--     FOR EACH ROW
+-- EXECUTE PROCEDURE insert_approvals();

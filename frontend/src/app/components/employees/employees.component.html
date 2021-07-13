@@ -1,1 +1,27 @@
-<p>employees works!</p>
+<h1>Registered Employees</h1>
+<div class="d-flex justify-content-center">
+</div>
+<table class="table" id='employees_tab'>
+    <thead>
+    <tr>
+        <th scope="col">Sr. No.</th>
+        <th scope="col">Employee ID</th>
+        <th scope="col">Department</th>
+        <th scope="col">Date of Joining</th>
+        <th scope="col">Date of Leaving</th>
+        <th scope="col">Salary</th>
+        <th scope="col">Work Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let e of e_li;">
+        <td>{{ e.id  }}</td>
+        <td>{{ e.employee_id }}</td>
+        <td>{{ e.dept_id }}</td>
+        <td>{{ e.doj }}</td>
+        <td>{{ e.dol }}</td>
+        <td>{{ e.salary }}</td>
+        <td>{{ (e.is_active) ? "Employed" : "Retired" }}</td>
+    </tr>
+    </tbody>
+</table>

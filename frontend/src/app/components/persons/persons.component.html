@@ -1,0 +1,16 @@
+<table class="table" id='persons_tab'>
+    <thead>
+    <tr>
+        <th scope="col">Sr. No.</th>
+        <th scope="col">Name</th>
+        <th scope="col">Date of Birth</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let p of p_li;">
+        <td>{{ p.id  }}</td>
+        <td>{{ p.first_name + " " + (p.middle_name === null ? "" : p.middle_name) + " " + p.last_name }}</td>
+        <td>{{ p.dob }}</td>
+    </tr>
+    </tbody>
+</table>
